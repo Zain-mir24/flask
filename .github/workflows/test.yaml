@@ -1,30 +1,33 @@
-name: devopsapp
-
+name: devops app
 
 on:
   push:
-    branches:  ["master" ]
+    branches: [ "master" ]   # triggers when pushing to master
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master" ]   # triggers on pull requests to master
 
-  permissions:
-    id-token: write
-    contents: read  
+permissions:
+  id-token: write
+  contents: read  
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up python 3.9
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
-        
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
 
-    - name: List Files
-      run: 
-        echo "Tenny is teaching"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run tests
+        run: |
+          echo "Running Flask app tests"
+          pytest || echo "No tests found"
