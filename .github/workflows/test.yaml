@@ -2,17 +2,23 @@ name: devops app
 
 on:
   push:
-    branches: [ "master" ]   # triggers when pushing to master
+    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]   # triggers on pull requests to master
+    branches: [ "master" ]
 
 permissions:
   id-token: write
-  contents: read  
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # example of job-level environment variables
+    env:
+      FLASK_ENV: development
+      # Example of reading a secret stored in repo Settings -> Secrets and variables -> Actions
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -22,12 +28,31 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run tests
+        # this step: fail the job if tests fail; if pytest returns "no tests collected" (exit code 5)
+        # we treat that as OK and continue
         run: |
+          set -e
           echo "Running Flask app tests"
-          pytest || echo "No tests found"
+          pytest -q || {
+            rc=$?
+            if [ "$rc" -eq 5 ]; then
+              echo "No tests collected by pytest (exit code 5) — continuing."
+            else
+              echo "Pytest failed (exit code $rc). Failing the job."
+              exit $rc
+            fi
+          }
