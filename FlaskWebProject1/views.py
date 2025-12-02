@@ -34,15 +34,6 @@ def about():
         message='Your application description page.'
     )
 
-@app.route('/amaz')
-def about():
-    return render_template(
-        'about.html',
-        title='About',
-        year=datetime.now().year,
-        message='Your application description page. Amaz is here'
-    )
-
 @app.route('/db-test')
 def db_test():
     try:
