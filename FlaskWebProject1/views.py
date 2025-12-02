@@ -34,6 +34,10 @@ def about():
         message='Your application description page.'
     )
 
+@app.route('/amaz')
+def amaz():
+    return 'Amazon Web Services is great!'
+
 @app.route('/db-test')
 def db_test():
     try:
