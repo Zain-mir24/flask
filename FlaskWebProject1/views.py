@@ -35,13 +35,8 @@ def about():
     )
 
 @app.route('/amaz')
-def about():
-    return render_template(
-        'about.html',
-        title='About',
-        year=datetime.now().year,
-        message='Your application description page. Amaz is here'
-    )
+def amaz():
+    return 'Amazon Web Services is great!'
 
 @app.route('/db-test')
 def db_test():
